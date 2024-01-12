@@ -33,6 +33,7 @@ class _PaymentPageState extends State<PaymentPage> {
           children: [
             buildOrderSummaryCard(context, cart),
             SizedBox(height: 16),
+            Text("Adresse de livraison", style: TextStyle(fontWeight: FontWeight.bold)),
             buildDeliveryAddressCard(context),
             SizedBox(height: 16),
             buildPaymentMethodsCard(context),
@@ -68,12 +69,12 @@ class _PaymentPageState extends State<PaymentPage> {
       var response = await http.post(
         Uri.parse("http://ptsv3.com/t/EPSISHOPC1/"),
         body: body,
-        headers: {"Content-Type": "application/json"},
+        //headers: {"Content-Type": "application/json"},
       );
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Votre commande est validée avec $selectedPaymentMethod")),
+          SnackBar(content: Text("Votre commande est validée !")),
         );
         cart.clearCart();
         GoRouter.of(context).go('/cart');
@@ -107,14 +108,22 @@ class _PaymentPageState extends State<PaymentPage> {
           children: [
             Text("Récapitulatif de la commande", style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
-            Text("Sous-Total: ${formatPrice(getTotalPrice(cart) - getTvaFromTotalPrice(cart))}€"),
-            SizedBox(height: 8),
-            Text("TVA: ${formatPrice(getTvaFromTotalPrice(cart))}€"),
-            SizedBox(height: 8),
-            Text("TOTAL: ${formatPrice(getTotalPrice(cart))}€", style: TextStyle(fontWeight: FontWeight.bold)),
+            buildSummaryRow("Sous-Total:", "${formatPrice(getTotalPrice(cart) - getTvaFromTotalPrice(cart))}€"),
+            buildSummaryRow("TVA:", "${formatPrice(getTvaFromTotalPrice(cart))}€"),
+            buildSummaryRow("TOTAL:", "${formatPrice(getTotalPrice(cart))}€", bold: true),
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildSummaryRow(String leftText, String rightText, {bool bold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(leftText),
+        Text(rightText, style: TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 
@@ -130,7 +139,6 @@ class _PaymentPageState extends State<PaymentPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Adresse de livraison", style: TextStyle(fontWeight: FontWeight.bold)),
             Text("Lefay Alexandre", style: TextStyle(fontWeight: FontWeight.bold)),
             Text("123 Rue Imaginaire,"),
             Text("75000 Paris"),
@@ -141,12 +149,8 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Widget buildPaymentMethodsCard(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
+    return Align(
+      alignment: Alignment.centerLeft,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -158,7 +162,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Espacement uniforme
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 paymentMethodIcon("Apple Pay", FontAwesomeIcons.ccApplePay),
                 paymentMethodIcon("Visa", FontAwesomeIcons.ccVisa),
@@ -171,6 +175,7 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
     );
   }
+
 
   Widget paymentMethodIcon(String label, IconData icon) {
     bool isSelected = label == selectedPaymentMethod;
@@ -187,32 +192,35 @@ class _PaymentPageState extends State<PaymentPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.black, // Mettez ici la couleur de la bordure souhaitée (noir dans ce cas)
+            color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
             width: 2,
           ),
         ),
         child: Stack(
           children: [
-            Positioned(
-              top: 4,
-              left: 4,
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
-                ),
-              ),
-            ),
             Center(
               child: Icon(icon, size: 30),
             ),
+            if (isSelected)
+              Positioned(
+                top: -2, // Ajustez cette valeur pour positionner la pastille
+                right: -2, // Ajustez cette valeur pour positionner la pastille
+                child: Container(
+                  width: 20, // Ajustez la taille de la pastille si nécessaire
+                  height: 20, // Ajustez la taille de la pastille si nécessaire
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  child: Icon(FontAwesomeIcons.checkCircle, size: 12, color: Colors.white),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+
 
 
   String formatPrice(double price) {
