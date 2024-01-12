@@ -182,12 +182,12 @@ class _PaymentPageState extends State<PaymentPage> {
         });
       },
       child: Container(
-        width: 60, // Taille carrée
+        width: 60,
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+            color: isSelected ? Theme.of(context).primaryColor : Colors.black, // Mettez ici la couleur de la bordure souhaitée (noir dans ce cas)
             width: 2,
           ),
         ),
@@ -197,7 +197,7 @@ class _PaymentPageState extends State<PaymentPage> {
               top: 4,
               left: 4,
               child: Container(
-                width: 12, // Taille de la pastille
+                width: 12,
                 height: 12,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -206,13 +206,14 @@ class _PaymentPageState extends State<PaymentPage> {
               ),
             ),
             Center(
-              child: Icon(icon, size: 30), // Taille de l'icône
+              child: Icon(icon, size: 30),
             ),
           ],
         ),
       ),
     );
   }
+
 
   String formatPrice(double price) {
     return price.toStringAsFixed(2);
