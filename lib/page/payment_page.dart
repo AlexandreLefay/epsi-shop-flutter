@@ -43,7 +43,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             SizedBox(height: 8),
             ElevatedButton(
-              onPressed: isSubmitting ? null : () => submitOrder(cart),
+              onPressed: isSubmitting || selectedPaymentMethod.isEmpty ? null : () => submitOrder(cart),
               child: isSubmitting ? CircularProgressIndicator() : Text("Confirmer l'achat"),
             ),
           ],
@@ -60,7 +60,7 @@ class _PaymentPageState extends State<PaymentPage> {
     // Construction du corps de la requête
     var body = json.encode({
       "total": getTotalPrice(cart),
-      "adresse": "Lefay Alexandre,123 Rue Imaginaire, 75000 Paris",
+      "adresse": "Lefay Alexandre, 3 rue des voitures, 72000 Le Mans",
       "paymentMethode": selectedPaymentMethod
     });
 
@@ -79,12 +79,12 @@ class _PaymentPageState extends State<PaymentPage> {
         GoRouter.of(context).go('/cart');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur lors de la validation de la commande")),
+          const SnackBar(content: Text("Erreur lors de la validation de la commande")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur réseau")),
+        const SnackBar(content: Text("Erreur réseau")),
       );
     } finally {
       setState(() {
@@ -157,13 +157,13 @@ class _PaymentPageState extends State<PaymentPage> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Espacement uniforme
               children: [
-                paymentChip("Apple Pay", FontAwesomeIcons.applePay),
-                paymentChip("Visa", FontAwesomeIcons.ccVisa),
-                paymentChip("Mastercard", FontAwesomeIcons.ccMastercard),
-                paymentChip("PayPal", FontAwesomeIcons.ccPaypal),
+                paymentMethodIcon("Apple Pay", FontAwesomeIcons.ccApplePay),
+                paymentMethodIcon("Visa", FontAwesomeIcons.ccVisa),
+                paymentMethodIcon("Mastercard", FontAwesomeIcons.ccMastercard),
+                paymentMethodIcon("PayPal", FontAwesomeIcons.ccPaypal),
               ],
             ),
           ],
@@ -172,7 +172,7 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  Widget paymentChip(String label, IconData icon) {
+  Widget paymentMethodIcon(String label, IconData icon) {
     bool isSelected = label == selectedPaymentMethod;
 
     return GestureDetector(
@@ -181,11 +181,35 @@ class _PaymentPageState extends State<PaymentPage> {
           selectedPaymentMethod = label;
         });
       },
-      child: Chip(
-        label: Text(label),
-        avatar: Icon(icon),
-        backgroundColor: isSelected ? Theme.of(context).colorScheme.secondary : null,
-        side: isSelected ? BorderSide(color: Theme.of(context).primaryColor, width: 2) : BorderSide.none,
+      child: Container(
+        width: 60, // Taille carrée
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 4,
+              left: 4,
+              child: Container(
+                width: 12, // Taille de la pastille
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+                ),
+              ),
+            ),
+            Center(
+              child: Icon(icon, size: 30), // Taille de l'icône
+            ),
+          ],
+        ),
       ),
     );
   }
